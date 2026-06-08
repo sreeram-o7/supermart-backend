@@ -1,0 +1,1 @@
+# Analytics uses existing models — no new models needed in v1

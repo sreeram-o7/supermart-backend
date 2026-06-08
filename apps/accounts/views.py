@@ -12,6 +12,7 @@ from apps.accounts.serializers import (
     AddressSerializer, UpdateProfileSerializer, CustomTokenObtainPairSerializer,
 )
 from apps.accounts.models import Address
+from apps.core.permissions import IsAdmin
 
 logger = logging.getLogger(__name__)
 
@@ -213,3 +214,49 @@ class SetDefaultAddressView(APIView):
         address.is_default = True
         address.save()
         return success_response(message='Default address updated successfully.')
+    
+class AdminUserListView(generics.ListAPIView):
+    permission_classes = [IsAdmin]
+    serializer_class = UserSerializer
+
+    def get_queryset(self):
+        from apps.core.permissions import IsAdmin
+        queryset = User.objects.filter(is_deleted=False).select_related('profile')
+        role = self.request.query_params.get('role')
+        if role:
+            queryset = queryset.filter(role=role)
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(queryset, many=True)
+        return success_response(data=serializer.data)
+
+
+class AdminUserDetailView(generics.RetrieveUpdateAPIView):
+    permission_classes = [IsAdmin]
+    serializer_class = UserSerializer
+    lookup_field = 'id'
+
+    def get_queryset(self):
+        return User.objects.select_related('profile')
+
+    def retrieve(self, request, *args, **kwargs):
+        return success_response(data=self.get_serializer(self.get_object()).data)
+
+    def patch(self, request, *args, **kwargs):
+        user = self.get_object()
+        allowed_fields = ['role', 'is_active']
+        data = {k: v for k, v in request.data.items() if k in allowed_fields}
+        for field, value in data.items():
+            setattr(user, field, value)
+        user.save()
+        return success_response(
+            data=self.get_serializer(user).data,
+            message='User updated successfully.',
+        )
+        

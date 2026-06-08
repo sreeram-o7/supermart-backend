@@ -15,13 +15,20 @@ import CheckoutPage from './pages/customer/CheckoutPage'
 import OrdersPage from './pages/customer/OrdersPage'
 import OrderDetailPage from './pages/customer/OrderDetailPage'
 import DashboardPage from './pages/admin/DashboardPage'
+import AdminProductsPage from './pages/admin/ProductsPage'
+import AdminOrdersPage from './pages/admin/OrdersPage'
+import AdminUsersPage from './pages/admin/UsersPage'
+import AdminCouponsPage from './pages/admin/CouponsPage'
+import AdminInventoryPage from './pages/admin/InventoryPage'
 import DeliveryDashboardPage from './pages/delivery/DeliveryDashboardPage'
+
+const ADMIN_ROLES = [ROLES.ADMIN, ROLES.SUPER_ADMIN]
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Public routes */}
+        {/* Public */}
         <Route path={ROUTES.HOME} element={<HomePage />} />
         <Route path={ROUTES.PRODUCTS} element={<ProductsPage />} />
         <Route path="/products/:slug" element={<ProductDetailPage />} />
@@ -29,33 +36,21 @@ export default function App() {
         <Route path="/orders/:orderNumber/track" element={<OrderDetailPage />} />
 
         {/* Guest only */}
-        <Route path={ROUTES.LOGIN} element={
-          <GuestRoute><LoginPage /></GuestRoute>
-        } />
-        <Route path={ROUTES.REGISTER} element={
-          <GuestRoute><RegisterPage /></GuestRoute>
-        } />
+        <Route path={ROUTES.LOGIN} element={<GuestRoute><LoginPage /></GuestRoute>} />
+        <Route path={ROUTES.REGISTER} element={<GuestRoute><RegisterPage /></GuestRoute>} />
 
-        {/* Customer routes */}
+        {/* Customer */}
         <Route path={ROUTES.CART} element={
-          <ProtectedRoute allowedRoles={[ROLES.CUSTOMER]}>
-            <CartPage />
-          </ProtectedRoute>
+          <ProtectedRoute allowedRoles={[ROLES.CUSTOMER]}><CartPage /></ProtectedRoute>
         } />
         <Route path={ROUTES.CHECKOUT} element={
-          <ProtectedRoute allowedRoles={[ROLES.CUSTOMER]}>
-            <CheckoutPage />
-          </ProtectedRoute>
+          <ProtectedRoute allowedRoles={[ROLES.CUSTOMER]}><CheckoutPage /></ProtectedRoute>
         } />
         <Route path={ROUTES.ORDERS} element={
-          <ProtectedRoute allowedRoles={[ROLES.CUSTOMER]}>
-            <OrdersPage />
-          </ProtectedRoute>
+          <ProtectedRoute allowedRoles={[ROLES.CUSTOMER]}><OrdersPage /></ProtectedRoute>
         } />
         <Route path="/orders/:orderNumber" element={
-          <ProtectedRoute allowedRoles={[ROLES.CUSTOMER]}>
-            <OrderDetailPage />
-          </ProtectedRoute>
+          <ProtectedRoute allowedRoles={[ROLES.CUSTOMER]}><OrderDetailPage /></ProtectedRoute>
         } />
         <Route path={ROUTES.PROFILE} element={
           <ProtectedRoute allowedRoles={[ROLES.CUSTOMER]}>
@@ -64,10 +59,23 @@ export default function App() {
         } />
 
         {/* Admin */}
-        <Route path={`${ROUTES.ADMIN_DASHBOARD}/*`} element={
-          <ProtectedRoute allowedRoles={[ROLES.ADMIN, ROLES.SUPER_ADMIN]}>
-            <DashboardPage />
-          </ProtectedRoute>
+        <Route path="/admin" element={
+          <ProtectedRoute allowedRoles={ADMIN_ROLES}><DashboardPage /></ProtectedRoute>
+        } />
+        <Route path="/admin/products" element={
+          <ProtectedRoute allowedRoles={ADMIN_ROLES}><AdminProductsPage /></ProtectedRoute>
+        } />
+        <Route path="/admin/orders" element={
+          <ProtectedRoute allowedRoles={ADMIN_ROLES}><AdminOrdersPage /></ProtectedRoute>
+        } />
+        <Route path="/admin/users" element={
+          <ProtectedRoute allowedRoles={ADMIN_ROLES}><AdminUsersPage /></ProtectedRoute>
+        } />
+        <Route path="/admin/coupons" element={
+          <ProtectedRoute allowedRoles={ADMIN_ROLES}><AdminCouponsPage /></ProtectedRoute>
+        } />
+        <Route path="/admin/inventory" element={
+          <ProtectedRoute allowedRoles={ADMIN_ROLES}><AdminInventoryPage /></ProtectedRoute>
         } />
 
         {/* Delivery */}
