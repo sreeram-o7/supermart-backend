@@ -7,7 +7,11 @@ DEBUG = False
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='').split(',')
 
 DATABASES = {
-    'default': dj_database_url.parse(config('DATABASE_URL'))
+    'default': dj_database_url.parse(
+        config('DATABASE_URL'),
+        conn_max_age=600,
+        ssl_require=True,
+    )
 }
 
 SECURE_BROWSER_XSS_FILTER = True
