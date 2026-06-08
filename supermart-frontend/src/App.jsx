@@ -7,6 +7,9 @@ import GuestRoute from './components/auth/GuestRoute'
 import LoginPage from './pages/auth/LoginPage'
 import RegisterPage from './pages/auth/RegisterPage'
 import HomePage from './pages/customer/HomePage'
+import ProductsPage from './pages/customer/ProductsPage'
+import ProductDetailPage from './pages/customer/ProductDetailPage'
+import SearchPage from './pages/customer/SearchPage'
 import DashboardPage from './pages/admin/DashboardPage'
 import DeliveryDashboardPage from './pages/delivery/DeliveryDashboardPage'
 
@@ -16,8 +19,11 @@ export default function App() {
       <Routes>
         {/* Public routes */}
         <Route path={ROUTES.HOME} element={<HomePage />} />
+        <Route path={ROUTES.PRODUCTS} element={<ProductsPage />} />
+        <Route path="/products/:slug" element={<ProductDetailPage />} />
+        <Route path="/search" element={<SearchPage />} />
 
-        {/* Guest-only routes (redirect to home if already logged in) */}
+        {/* Guest-only routes */}
         <Route path={ROUTES.LOGIN} element={
           <GuestRoute><LoginPage /></GuestRoute>
         } />
