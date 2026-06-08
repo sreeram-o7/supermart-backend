@@ -1,6 +1,5 @@
 import { Navigate, useLocation } from 'react-router-dom'
 import useAuthStore from '../../store/authStore'
-import Spinner from '../ui/Spinner'
 import { ROUTES } from '../../constants'
 
 export default function ProtectedRoute({ children, allowedRoles = [] }) {

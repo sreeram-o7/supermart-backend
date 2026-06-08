@@ -100,6 +100,15 @@ export default function Navbar() {
                   </span>
                 </Link>
 
+                {/* Orders link */}
+                <Link
+                  to={ROUTES.ORDERS}
+                  className="hidden md:flex items-center gap-1 text-sm text-gray-600 hover:text-primary-500 transition-colors"
+                >
+                  <Package size={16} />
+                  Orders
+                </Link>
+
                 {/* Logout */}
                 <button
                   onClick={handleLogout}
