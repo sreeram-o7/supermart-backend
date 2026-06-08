@@ -23,6 +23,8 @@ import AdminInventoryPage from './pages/admin/InventoryPage'
 import DeliveryDashboardPage from './pages/delivery/DeliveryDashboardPage'
 import AssignmentsPage from './pages/delivery/AssignmentsPage'
 import ManagerPage from './pages/delivery/ManagerPage'
+import ProfilePage from './pages/customer/ProfilePage'
+import NotFoundPage from './pages/NotFoundPage'
 
 const ADMIN_ROLES = [ROLES.ADMIN, ROLES.SUPER_ADMIN]
 const DELIVERY_ROLES = [ROLES.DELIVERY_PARTNER, ROLES.DELIVERY_MANAGER, ROLES.ADMIN, ROLES.SUPER_ADMIN]
@@ -57,7 +59,7 @@ export default function App() {
         } />
         <Route path={ROUTES.PROFILE} element={
           <ProtectedRoute allowedRoles={[ROLES.CUSTOMER]}>
-            <div className="p-8 text-center text-gray-500">Profile page — Sprint 4</div>
+            <ProfilePage />
           </ProtectedRoute>
         } />
 
@@ -98,7 +100,7 @@ export default function App() {
           </ProtectedRoute>
         } />
 
-        <Route path="*" element={<Navigate to={ROUTES.HOME} replace />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
   )

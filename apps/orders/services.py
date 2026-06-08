@@ -120,6 +120,15 @@ class OrderService:
         cart.items.all().delete()
 
         logger.info('Order %s created for user %s', order.order_number, user.email)
+        
+        # Send notification
+        try:
+            from apps.notifications.services import NotificationService
+            NotificationService.notify_order_placed(order)
+        except Exception as e:
+            logger.error('Failed to send order notification: %s', str(e))
+
+        logger.info('Order %s created for user %s', order.order_number, user.email)
         return order
 
     @staticmethod
@@ -159,6 +168,13 @@ class OrderService:
         previous_status = order.status
         order.status = new_status
         order.save(update_fields=['status', 'updated_at'])
+        
+        # Send notification
+        try:
+            from apps.notifications.services import NotificationService
+            NotificationService.notify_order_status_changed(order, new_status)
+        except Exception as e:
+            logger.error('Failed to send status notification: %s', str(e))
 
         OrderStatusHistory.objects.create(
             order=order,
