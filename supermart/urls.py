@@ -6,8 +6,16 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 urlpatterns = [
     path('django-admin/', admin.site.urls),
+
+    # Auth & Users
     path('api/v1/auth/', include('apps.accounts.urls.auth_urls')),
     path('api/v1/users/', include('apps.accounts.urls.user_urls')),
+
+    # Catalog & Inventory
+    path('api/v1/', include('apps.catalog.urls')),
+    path('api/v1/', include('apps.inventory.urls')),
+
+    # API Docs
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
 ]
