@@ -30,7 +30,12 @@ urlpatterns = [
     # API Docs
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-    path('api/v1/analytics/', include('apps.analytics.urls')),
+    
+    # Analytics
+    path('api/v1/', include('apps.analytics.urls')),
+    
+    # Delivery
+    path('api/v1/', include('apps.delivery.urls')),
 ]
 
 if settings.DEBUG:

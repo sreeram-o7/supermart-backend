@@ -21,8 +21,11 @@ import AdminUsersPage from './pages/admin/UsersPage'
 import AdminCouponsPage from './pages/admin/CouponsPage'
 import AdminInventoryPage from './pages/admin/InventoryPage'
 import DeliveryDashboardPage from './pages/delivery/DeliveryDashboardPage'
+import AssignmentsPage from './pages/delivery/AssignmentsPage'
+import ManagerPage from './pages/delivery/ManagerPage'
 
 const ADMIN_ROLES = [ROLES.ADMIN, ROLES.SUPER_ADMIN]
+const DELIVERY_ROLES = [ROLES.DELIVERY_PARTNER, ROLES.DELIVERY_MANAGER, ROLES.ADMIN, ROLES.SUPER_ADMIN]
 
 export default function App() {
   return (
@@ -79,9 +82,19 @@ export default function App() {
         } />
 
         {/* Delivery */}
-        <Route path={`${ROUTES.DELIVERY_PORTAL}/*`} element={
-          <ProtectedRoute allowedRoles={[ROLES.DELIVERY_PARTNER, ROLES.DELIVERY_MANAGER]}>
+        <Route path="/delivery" element={
+          <ProtectedRoute allowedRoles={DELIVERY_ROLES}>
             <DeliveryDashboardPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/delivery/assignments" element={
+          <ProtectedRoute allowedRoles={DELIVERY_ROLES}>
+            <AssignmentsPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/delivery/manager" element={
+          <ProtectedRoute allowedRoles={[ROLES.DELIVERY_MANAGER, ROLES.ADMIN, ROLES.SUPER_ADMIN]}>
+            <ManagerPage />
           </ProtectedRoute>
         } />
 
