@@ -1,15 +1,26 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { ShoppingCart, User, LogOut, LayoutDashboard, Package } from 'lucide-react'
+import { ShoppingCart, LogOut, LayoutDashboard, Package } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
 import useAuthStore from '../../store/authStore'
-import useCartStore from '../../store/cartStore'
+import { cartApi } from '../../api/orders.api'
 import { ROUTES, ROLES } from '../../constants'
 import { getInitials } from '../../utils/formatters'
 
 export default function Navbar() {
   const { user, accessToken } = useAuthStore()
   const logout = useAuthStore((s) => s.logout)
-  const itemCount = useCartStore((s) => s.getItemCount())
   const navigate = useNavigate()
+
+  const { data: cartData } = useQuery({
+    queryKey: ['cart'],
+    queryFn: () => cartApi.getCart(),
+    select: (res) => res.data.data,
+    enabled: !!accessToken,
+    refetchOnWindowFocus: true,
+    staleTime: 0,
+  })
+
+  const itemCount = cartData?.total_items || 0
 
   const handleLogout = async () => {
     await logout()

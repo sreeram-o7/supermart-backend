@@ -1,18 +1,36 @@
 import { Link } from 'react-router-dom'
 import { ShoppingCart, Star } from 'lucide-react'
 import { formatPrice } from '../../utils/formatters'
+import { cartApi } from '../../api/orders.api'
+import { useQueryClient } from '@tanstack/react-query'
+import useAuthStore from '../../store/authStore'
 import useCartStore from '../../store/cartStore'
 import toast from 'react-hot-toast'
 
 export default function ProductCard({ product }) {
+  const queryClient = useQueryClient()
+  const { isAuthenticated } = useAuthStore()
   const addItem = useCartStore((s) => s.addItem)
 
-  const handleAddToCart = (e) => {
+  const handleAddToCart = async (e) => {
     e.preventDefault()
     e.stopPropagation()
     if (!product.is_in_stock) return
-    addItem(product, 1)
-    toast.success(`${product.name} added to cart`)
+
+    if (isAuthenticated()) {
+      // Logged in — call backend API
+      try {
+        await cartApi.addItem(product.id, 1)
+        await queryClient.invalidateQueries({ queryKey: ['cart'] })
+        toast.success(`${product.name} added to cart`)
+      } catch (error) {
+        toast.error(error.response?.data?.message || 'Failed to add to cart.')
+      }
+    } else {
+      // Guest — use Zustand local store
+      addItem(product, 1)
+      toast.success(`${product.name} added to cart`)
+    }
   }
 
   return (

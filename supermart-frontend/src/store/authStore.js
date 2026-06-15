@@ -26,6 +26,7 @@ const useAuthStore = create(
           const { access, refresh, user } = response.data.data
           localStorage.setItem('access_token', access)
           localStorage.setItem('refresh_token', refresh)
+          localStorage.removeItem('supermart-cart')
           set({
             accessToken: access,
             refreshToken: refresh,
@@ -66,6 +67,8 @@ const useAuthStore = create(
         } finally {
           localStorage.removeItem('access_token')
           localStorage.removeItem('refresh_token')
+          localStorage.removeItem('supermart-cart')
+
           set({
             user: null,
             accessToken: null,

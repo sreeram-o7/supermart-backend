@@ -45,4 +45,7 @@ export const ordersApi = {
 
   initiatePayment: (orderId) =>
     apiClient.post('/payments/initiate/', { order_id: orderId }),
+  
+  confirmPayment: (data) =>
+    apiClient.post('/payments/confirm/', data),
 }

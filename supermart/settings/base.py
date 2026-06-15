@@ -177,3 +177,7 @@ LOGGING = {
         'apps': {'handlers': ['console', 'file'], 'level': 'DEBUG', 'propagate': False},
     },
 }
+# Razorpay
+import os as _os
+RAZORPAY_KEY_ID = config('RAZORPAY_KEY_ID', default='')
+RAZORPAY_KEY_SECRET = config('RAZORPAY_KEY_SECRET', default='')
