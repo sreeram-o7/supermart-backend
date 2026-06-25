@@ -1,22 +1,28 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ShoppingCart, ArrowLeft, Star, Package, Tag } from 'lucide-react'
 import PageWrapper from '../../components/layout/PageWrapper'
 import Spinner from '../../components/ui/Spinner'
 import Button from '../../components/ui/Button'
 import { catalogApi } from '../../api/catalog.api'
+import { cartApi } from '../../api/orders.api'
 import { formatPrice } from '../../utils/formatters'
+import useAuthStore from '../../store/authStore'
 import useCartStore from '../../store/cartStore'
 import toast from 'react-hot-toast'
 
 export default function ProductDetailPage() {
   const { slug } = useParams()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const accessToken = useAuthStore((s) => s.accessToken)
   const addItem = useCartStore((s) => s.addItem)
+
   const [selectedVariant, setSelectedVariant] = useState(null)
   const [quantity, setQuantity] = useState(1)
   const [activeImage, setActiveImage] = useState(0)
+  const [addingToCart, setAddingToCart] = useState(false)
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['product', slug],
@@ -51,9 +57,22 @@ export default function ProductDetailPage() {
   const price = selectedVariant?.selling_price || product.selling_price
   const basePrice = selectedVariant?.base_price || product.base_price
 
-  const handleAddToCart = () => {
-    addItem(product, quantity, selectedVariant)
-    toast.success(`${product.name} added to cart!`)
+  const handleAddToCart = async () => {
+    setAddingToCart(true)
+    try {
+      if (accessToken) {
+        await cartApi.addItem(product.id, quantity)
+        await queryClient.refetchQueries({ queryKey: ['cart'] })
+        toast.success(`${product.name} added to cart!`)
+      } else {
+        addItem(product, quantity, selectedVariant)
+        toast.success(`${product.name} added to cart!`)
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to add to cart.')
+    } finally {
+      setAddingToCart(false)
+    }
   }
 
   return (
@@ -222,6 +241,7 @@ export default function ProductDetailPage() {
 
                 <Button
                   onClick={handleAddToCart}
+                  loading={addingToCart}
                   size="lg"
                   className="flex-1 flex items-center justify-center gap-2"
                 >

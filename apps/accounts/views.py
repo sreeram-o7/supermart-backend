@@ -11,7 +11,7 @@ from apps.accounts.serializers import (
     ResetPasswordSerializer, VerifyEmailSerializer, ChangePasswordSerializer,
     AddressSerializer, UpdateProfileSerializer, CustomTokenObtainPairSerializer,
 )
-from apps.accounts.models import Address
+from apps.accounts.models import Address, User
 from apps.core.permissions import IsAdmin
 
 logger = logging.getLogger(__name__)
@@ -221,7 +221,7 @@ class AdminUserListView(generics.ListAPIView):
 
     def get_queryset(self):
         from apps.core.permissions import IsAdmin
-        queryset = User.objects.filter(is_deleted=False).select_related('profile')
+        queryset = User.objects.select_related('profile').all()
         role = self.request.query_params.get('role')
         if role:
             queryset = queryset.filter(role=role)

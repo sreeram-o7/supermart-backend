@@ -8,11 +8,14 @@ import { adminApi } from '../../api/admin.api'
 import { catalogApi } from '../../api/catalog.api'
 import { formatPrice } from '../../utils/formatters'
 import toast from 'react-hot-toast'
+import BulkImportModal from '../../components/admin/BulkImportModal'
+import { Upload } from 'lucide-react'
 
 export default function ProductsPage() {
   const queryClient = useQueryClient()
   const [search, setSearch] = useState('')
   const [showForm, setShowForm] = useState(false)
+  const [showBulkImport, setShowBulkImport] = useState(false)
   const [editProduct, setEditProduct] = useState(null)
   const [form, setForm] = useState({
     name: '', slug: '', category: '', brand_name: '',
@@ -117,9 +120,18 @@ export default function ProductsPage() {
             className="input-field pl-9 text-sm"
           />
         </div>
-        <Button onClick={openAdd} className="flex items-center gap-2">
-          <Plus size={16} /> Add Product
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button
+            variant="secondary"
+            onClick={() => setShowBulkImport(true)}
+            className="flex items-center gap-2"
+          >
+            <Upload size={16} /> Bulk Import
+          </Button>
+          <Button onClick={openAdd} className="flex items-center gap-2">
+            <Plus size={16} /> Add Product
+          </Button>
+        </div>
       </div>
 
       {/* Table */}
@@ -261,6 +273,9 @@ export default function ProductsPage() {
             </div>
           </div>
         </div>
+      )}
+      {showBulkImport && (
+        <BulkImportModal onClose={() => setShowBulkImport(false)} />
       )}
     </AdminLayout>
   )

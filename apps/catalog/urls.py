@@ -15,4 +15,9 @@ urlpatterns = [
     path('admin/products/', views.AdminProductListCreateView.as_view(), name='admin-product-list'),
     path('admin/products/<uuid:id>/', views.AdminProductDetailView.as_view(), name='admin-product-detail'),
     path('admin/categories/', views.AdminCategoryListCreateView.as_view(), name='admin-category-list'),
+
+    #products CSV upload endpoint
+    path('admin/products/bulk-import/', views.AdminBulkImportView.as_view(), name='admin-bulk-import'),
+    path('admin/products/import-template/', views.BulkImportTemplateView.as_view(), name='import-template'),
+
 ]

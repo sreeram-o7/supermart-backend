@@ -24,6 +24,17 @@ export const adminApi = {
   deleteProduct: (id) =>
     apiClient.delete(`/admin/products/${id}/`),
 
+  bulkImportProducts: (file) => {
+    const formData = new FormData()
+    formData.append('file', file)
+    return apiClient.post('/admin/products/bulk-import/', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+  },
+
+  downloadImportTemplate: () =>
+    apiClient.get('/admin/products/import-template/', { responseType: 'blob' }),
+
   // Orders
   getOrders: (params = {}) =>
     apiClient.get('/admin/orders/', { params }),
@@ -36,10 +47,10 @@ export const adminApi = {
 
   // Users
   getUsers: (params = {}) =>
-    apiClient.get('/admin/users/', { params }),
+    apiClient.get('/users/admin/users/', { params }),
 
   updateUser: (id, data) =>
-    apiClient.patch(`/admin/users/${id}/`, data),
+    apiClient.patch(`/users/admin/users/${id}/`, data),
 
   // Coupons
   getCoupons: () =>

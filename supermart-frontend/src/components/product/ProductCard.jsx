@@ -9,7 +9,7 @@ import toast from 'react-hot-toast'
 
 export default function ProductCard({ product }) {
   const queryClient = useQueryClient()
-  const { isAuthenticated } = useAuthStore()
+  const accessToken = useAuthStore((s) => s.accessToken)
   const addItem = useCartStore((s) => s.addItem)
 
   const handleAddToCart = async (e) => {
@@ -17,17 +17,15 @@ export default function ProductCard({ product }) {
     e.stopPropagation()
     if (!product.is_in_stock) return
 
-    if (isAuthenticated()) {
-      // Logged in — call backend API
+    if (accessToken) {
       try {
         await cartApi.addItem(product.id, 1)
-        await queryClient.invalidateQueries({ queryKey: ['cart'] })
+        await queryClient.refetchQueries({ queryKey: ['cart'] })
         toast.success(`${product.name} added to cart`)
       } catch (error) {
         toast.error(error.response?.data?.message || 'Failed to add to cart.')
       }
     } else {
-      // Guest — use Zustand local store
       addItem(product, 1)
       toast.success(`${product.name} added to cart`)
     }

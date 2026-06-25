@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { ShoppingCart, ArrowLeft } from 'lucide-react'
 import PageWrapper from '../../components/layout/PageWrapper'
@@ -7,7 +7,6 @@ import CartSummary from '../../components/cart/CartSummary'
 import Spinner from '../../components/ui/Spinner'
 import { cartApi } from '../../api/orders.api'
 import { ROUTES } from '../../constants'
-import { Link } from 'react-router-dom'
 
 export default function CartPage() {
   const navigate = useNavigate()
@@ -16,6 +15,8 @@ export default function CartPage() {
     queryKey: ['cart'],
     queryFn: () => cartApi.getCart(),
     select: (res) => res.data.data,
+    refetchOnWindowFocus: true,
+    staleTime: 0,
   })
 
   const handleProceed = ({ couponData, total, discount }) => {

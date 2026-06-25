@@ -1,0 +1,3 @@
+name,sku,category,brand_name,base_price,selling_price,unit,short_description,is_featured
+
+Example==>Fresh Apples,FV-APP-002,Fruits & Vegetables,Farm Fresh,120,99,1kg,Fresh red apples,true

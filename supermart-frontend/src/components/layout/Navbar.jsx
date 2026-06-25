@@ -96,6 +96,15 @@ export default function Navbar() {
                   </Link>
                 )}
 
+                {/* Orders link */}
+                <Link
+                  to={ROUTES.ORDERS}
+                  className="hidden md:flex items-center gap-1 text-sm text-gray-600 hover:text-primary-500 transition-colors"
+                >
+                  <Package size={16} />
+                  Orders
+                </Link>
+
                 {/* Avatar */}
                 <Link
                   to={ROUTES.PROFILE}
@@ -109,15 +118,6 @@ export default function Navbar() {
                   <span className="hidden md:block font-medium">
                     {user.full_name || user.email}
                   </span>
-                </Link>
-
-                {/* Orders link */}
-                <Link
-                  to={ROUTES.ORDERS}
-                  className="hidden md:flex items-center gap-1 text-sm text-gray-600 hover:text-primary-500 transition-colors"
-                >
-                  <Package size={16} />
-                  Orders
                 </Link>
 
                 {/* Logout */}

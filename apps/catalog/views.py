@@ -246,3 +246,157 @@ class AdminCategoryListCreateView(generics.ListCreateAPIView):
                 message='Category created successfully.',
             )
         return error_response(message='Failed to create category.', errors=serializer.errors)
+
+class AdminBulkImportView(APIView):
+    permission_classes = [IsAdmin]
+
+    def post(self, request):
+        file = request.FILES.get('file')
+        if not file:
+            return error_response(message='No file uploaded.')
+
+        if not file.name.endswith(('.csv', '.xlsx', '.xls')):
+            return error_response(message='Only CSV or Excel files are supported.')
+
+        import pandas as pd
+        from django.utils.text import slugify
+        from apps.inventory.models import Inventory
+
+        try:
+            if file.name.endswith('.csv'):
+                df = pd.read_csv(file)
+            else:
+                df = pd.read_excel(file)
+        except Exception as e:
+            return error_response(message=f'Failed to read file: {str(e)}')
+
+        required_columns = ['name', 'sku', 'category', 'base_price', 'selling_price', 'unit']
+        missing_columns = [col for col in required_columns if col not in df.columns]
+        if missing_columns:
+            return error_response(
+                message=f'Missing required columns: {", ".join(missing_columns)}'
+            )
+
+        created_count = 0
+        updated_count = 0
+        skipped_rows = []
+
+        for index, row in df.iterrows():
+            row_num = index + 2  # +2 for header row and 0-index
+
+            try:
+                name = str(row['name']).strip()
+                sku = str(row['sku']).strip()
+                category_name = str(row['category']).strip()
+
+                if not name or not sku or not category_name:
+                    skipped_rows.append({
+                        'row': row_num,
+                        'reason': 'Missing name, sku, or category',
+                    })
+                    continue
+
+                category = Category.objects.filter(
+                    name__iexact=category_name
+                ).first()
+
+                if not category:
+                    category = Category.objects.create(
+                        name=category_name,
+                        slug=slugify(category_name),
+                        is_active=True,
+                    )
+
+                base_price = float(row['base_price'])
+                selling_price = float(row['selling_price'])
+
+                if selling_price > base_price:
+                    skipped_rows.append({
+                        'row': row_num,
+                        'reason': f'Selling price ({selling_price}) cannot exceed base price ({base_price})',
+                    })
+                    continue
+
+                product_defaults = {
+                    'name': name,
+                    'slug': slugify(name),
+                    'category': category,
+                    'brand_name': str(row.get('brand_name', '')).strip() if pd.notna(row.get('brand_name')) else '',
+                    'short_description': str(row.get('short_description', '')).strip() if pd.notna(row.get('short_description')) else '',
+                    'base_price': base_price,
+                    'selling_price': selling_price,
+                    'unit': str(row['unit']).strip(),
+                    'is_active': True,
+                    'is_featured': bool(row.get('is_featured', False)) if pd.notna(row.get('is_featured')) else False,
+                }
+
+                barcode = row.get('barcode')
+                if pd.notna(barcode) and str(barcode).strip():
+                    product_defaults['barcode'] = str(barcode).strip()
+
+                product, created = Product.objects.update_or_create(
+                    sku=sku,
+                    defaults=product_defaults,
+                )
+
+                stock_qty = row.get('stock_quantity', 100)
+                stock_qty = int(stock_qty) if pd.notna(stock_qty) else 100
+
+                Inventory.objects.update_or_create(
+                    product=product,
+                    defaults={'quantity_in_stock': stock_qty}
+                )
+
+                if created:
+                    created_count += 1
+                else:
+                    updated_count += 1
+
+            except Exception as e:
+                skipped_rows.append({
+                    'row': row_num,
+                    'reason': str(e),
+                })
+
+        return success_response(
+            data={
+                'created': created_count,
+                'updated': updated_count,
+                'skipped': len(skipped_rows),
+                'skipped_details': skipped_rows[:20],  # limit to first 20 errors
+                'total_rows_processed': len(df),
+            },
+            message=f'Import complete: {created_count} created, {updated_count} updated, {len(skipped_rows)} skipped.',
+        )
+
+
+class BulkImportTemplateView(APIView):
+    permission_classes = [IsAdmin]
+
+    def get(self, request):
+        import pandas as pd
+        from django.http import HttpResponse
+        import io
+
+        sample_data = {
+            'name': ['Fresh Apples', 'Maggi Noodles'],
+            'sku': ['FV-APP-002', 'SB-MAG-002'],
+            'category': ['Fruits & Vegetables', 'Snacks & Beverages'],
+            'brand_name': ['Farm Fresh', 'Maggi'],
+            'base_price': [120.00, 14.00],
+            'selling_price': [99.00, 14.00],
+            'unit': ['1kg', '70g'],
+            'short_description': ['Fresh red apples', '2-minute instant noodles'],
+            'barcode': ['8901111111111', '8901111111112'],
+            'stock_quantity': [100, 200],
+            'is_featured': [True, False],
+        }
+
+        df = pd.DataFrame(sample_data)
+        buffer = io.StringIO()
+        df.to_csv(buffer, index=False)
+        buffer.seek(0)
+
+        response = HttpResponse(buffer.getvalue(), content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="product_import_template.csv"'
+        return response
